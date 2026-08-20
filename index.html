@@ -806,21 +806,32 @@ function buildNode(node, path, isRoot){
   nameEl.textContent = node.name || (isRoot ? '(root)' : '(sin nombre)');
   nameEl.title = 'clic para renombrar';
   if(!isRoot){
-    nameEl.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const input = document.createElement('input');
-      input.className = 'val-input';
-      input.value = node.name;
-      input.style.maxWidth='160px';
-      nameEl.replaceWith(input);
-      input.focus(); input.select();
-      const commit = ()=>{
-        node.name = input.value;
-        render();
-      };
-      input.addEventListener('blur', commit);
-      input.addEventListener('keydown', ev=>{ if(ev.key==='Enter') input.blur(); });
-    });
+    function attachRenameHandler(el){
+      el.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const input = document.createElement('input');
+        input.className = 'val-input';
+        input.value = node.name;
+        input.style.maxWidth='160px';
+        el.replaceWith(input);
+        input.focus(); input.select();
+        const commit = ()=>{
+          node.name = input.value;
+          // solo reconstruimos esta etiqueta puntual, no todo el árbol
+          // (evita colapsar el árbol de vuelta a la raíz en cada renombrado)
+          const freshNameEl = document.createElement('span');
+          freshNameEl.className = 'tag-name editable';
+          freshNameEl.textContent = node.name || '(sin nombre)';
+          freshNameEl.title = 'clic para renombrar';
+          attachRenameHandler(freshNameEl);
+          input.replaceWith(freshNameEl);
+          if(node.__listParent){ node.__listParent.items[node.__listIndex] = node.value; }
+        };
+        input.addEventListener('blur', commit);
+        input.addEventListener('keydown', ev=>{ if(ev.key==='Enter') input.blur(); });
+      });
+    }
+    attachRenameHandler(nameEl);
   }
   row.appendChild(nameEl);
 
