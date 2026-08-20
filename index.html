@@ -269,6 +269,121 @@
   }
   a.link{color:var(--diamond);}
 
+  /* ---------- pestañas ---------- */
+  .tabbar{
+    display:flex; gap:6px; margin:0 0 14px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:0;
+  }
+  .tab-btn{
+    font-family:var(--display); font-size:12.5px; font-weight:600; letter-spacing:.02em;
+    padding:9px 16px; background:transparent; border:1px solid transparent; border-bottom:none;
+    color:var(--ink-dim); border-radius:4px 4px 0 0; cursor:pointer; transition:color .1s, background .1s;
+  }
+  .tab-btn:hover{color:var(--ink); background:var(--panel-2);}
+  .tab-btn.active{
+    color:var(--diamond); background:var(--panel); border-color:var(--line);
+    box-shadow:0 -2px 0 0 var(--diamond) inset;
+  }
+
+  /* ---------- vistas especiales ---------- */
+  .special-view{
+    background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:18px;
+  }
+  .sv-note{
+    font-family:var(--mono); font-size:12.5px; color:var(--ink-dim); line-height:1.6;
+    padding:14px; background:var(--panel-2); border-left:2px solid var(--gold); border-radius:4px;
+  }
+  .sv-section{margin-bottom:22px;}
+  .sv-section:last-child{margin-bottom:0;}
+  .sv-title{
+    font-family:var(--display); font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--diamond); margin:0 0 12px; display:flex; align-items:center; gap:8px;
+  }
+  .sv-title::before{content:""; width:14px; height:1px; background:var(--diamond-dim); display:inline-block;}
+  .sv-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr)); gap:12px;}
+  .sv-field{display:flex; flex-direction:column; gap:5px;}
+  .sv-field label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .sv-field input, .sv-field select{
+    font-family:var(--mono); font-size:13px; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--gold); border-radius:4px; padding:8px 10px;
+  }
+  .sv-field select{color:var(--ink);}
+  .sv-field input:focus, .sv-field select:focus{outline:none; border-color:var(--gold);}
+  .sv-field.missing input, .sv-field.missing select{color:var(--ink-faint); font-style:italic;}
+  .sv-missing-tag{font-size:10px; color:var(--ink-faint); font-family:var(--mono);}
+
+  /* inventario: cuadrícula tipo Minecraft */
+  .inv-block{margin-bottom:20px;}
+  .inv-block:last-child{margin-bottom:0;}
+  .inv-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .inv-row.grid9{display:grid; grid-template-columns:repeat(9, 1fr); gap:6px; max-width:520px;}
+  .slot{
+    position:relative; aspect-ratio:1; min-width:44px; border-radius:4px;
+    border:1px solid var(--line); background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:border-color .1s, background .1s;
+  }
+  .slot:hover{border-color:var(--diamond-dim); background:#1d2528;}
+  .slot.filled{border-color:var(--line-bright); background:linear-gradient(160deg, rgba(226,177,60,.06), var(--panel-2));}
+  .slot .slot-id{
+    font-family:var(--mono); font-size:8.5px; color:var(--ink); text-align:center; line-height:1.2;
+    padding:2px; word-break:break-word; max-width:100%;
+  }
+  .slot .slot-count{
+    position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:10px; font-weight:600; color:var(--gold);
+  }
+  .slot .slot-plus{color:var(--ink-faint); font-size:18px;}
+  .slot-label{font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); text-align:center; margin-top:3px;}
+  .slot-wrap{display:flex; flex-direction:column; align-items:center;}
+
+  .slot-editor{
+    position:fixed; inset:0; background:rgba(6,8,9,.72); display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .slot-editor-box{
+    background:var(--panel); border:1px solid var(--line-bright); border-radius:6px; padding:20px;
+    width:100%; max-width:340px; border-top:2px solid var(--diamond);
+  }
+  .slot-editor-box h4{margin:0 0 14px; font-family:var(--display); font-size:14px; color:var(--ink);}
+  .slot-editor-box .sv-field{margin-bottom:12px;}
+  .slot-editor-actions{display:flex; gap:8px; margin-top:16px;}
+  .slot-editor-actions button{flex:1;}
+
+  /* ---------- toast de guardado ---------- */
+  .save-toast{
+    position:fixed; left:50%; bottom:26px; z-index:80;
+    display:flex; align-items:center; gap:12px;
+    background:linear-gradient(135deg, #16302e, var(--panel));
+    border:1px solid var(--diamond-dim); border-left:3px solid var(--diamond);
+    border-radius:8px; padding:13px 18px 13px 15px;
+    box-shadow:0 8px 30px -8px rgba(0,0,0,.6), 0 0 24px -6px rgba(95,214,208,.35);
+    max-width:min(90vw, 360px);
+    transform:translate(-50%, 16px) scale(.96); opacity:0; pointer-events:none;
+    transition:transform .35s cubic-bezier(.2,.9,.25,1.2), opacity .28s ease;
+  }
+  .save-toast.show{ transform:translate(-50%, 0) scale(1); opacity:1; }
+  .save-toast-icon{
+    flex:0 0 auto; width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--diamond); background:rgba(95,214,208,.12); border:1px solid var(--diamond-dim);
+    animation:toast-pop .45s cubic-bezier(.3,1.4,.4,1) .05s both;
+  }
+  .save-toast.show .save-toast-icon{ animation:toast-pop .45s cubic-bezier(.3,1.4,.4,1) .05s both; }
+  @keyframes toast-pop{
+    0%{ transform:scale(.4); opacity:0; }
+    60%{ transform:scale(1.15); opacity:1; }
+    100%{ transform:scale(1); }
+  }
+  .save-toast-text{ font-family:var(--sans); font-size:12.5px; color:var(--ink-dim); line-height:1.45; }
+  .save-toast-text b{ color:var(--ink); font-family:var(--display); font-size:13.5px; font-weight:600; letter-spacing:.01em; }
+
+  @media (prefers-reduced-motion: reduce){
+    .save-toast{ transition:opacity .15s ease; transform:translate(-50%,0) scale(1); }
+    .save-toast-icon{ animation:none; }
+  }
+
   /* móvil: apilar toolbar, achicar textos, evitar overflow horizontal */
   @media (max-width:640px){
     .hero{padding:30px 16px 22px; gap:16px;}
@@ -294,6 +409,12 @@
     .children{margin-left:10px; padding-left:6px;}
     .add-form{width:100%;}
     .add-form select, .add-form input{flex:1 1 auto; min-width:0;}
+    .tab-btn{flex:1 1 auto; text-align:center; padding:9px 8px; font-size:11.5px;}
+    .special-view{padding:12px;}
+    .sv-grid{grid-template-columns:repeat(auto-fill, minmax(140px,1fr));}
+    .inv-row.grid9{grid-template-columns:repeat(9, 1fr); gap:4px; max-width:100%;}
+    .slot{min-width:0;}
+    .slot .slot-id{font-size:7px;}
   }
 </style>
 </head>
@@ -345,7 +466,17 @@
     <button id="btnSave" class="primary">Guardar level.dat</button>
   </div>
 
+  <div id="tabBar" class="tabbar" style="display:none;">
+    <button class="tab-btn active" data-tab="tree" type="button">🌳 Árbol NBT</button>
+    <button class="tab-btn" data-tab="world" type="button">🌍 Mundo</button>
+    <button class="tab-btn" data-tab="player" type="button">🧍 Jugador</button>
+    <button class="tab-btn" data-tab="inventory" type="button">🎒 Inventario</button>
+  </div>
+
   <div id="treeWrap" class="tree-wrap" style="display:none;"></div>
+  <div id="worldView" class="special-view" style="display:none;"></div>
+  <div id="playerView" class="special-view" style="display:none;"></div>
+  <div id="inventoryView" class="special-view" style="display:none;"></div>
 
 </main>
 
@@ -543,6 +674,10 @@ const els = {
   btnReload: document.getElementById('btnReload'),
   btnExpandAll: document.getElementById('btnExpandAll'),
   btnCollapseAll: document.getElementById('btnCollapseAll'),
+  tabBar: document.getElementById('tabBar'),
+  worldView: document.getElementById('worldView'),
+  playerView: document.getElementById('playerView'),
+  inventoryView: document.getElementById('inventoryView'),
 };
 
 function showError(msg){
@@ -598,6 +733,7 @@ async function handleFile(file){
       throw new Error("El archivo es demasiado pequeño para ser un level.dat válido.");
     }
 
+    currentTab = 'tree';
     render();
   }catch(err){
     console.error(err);
@@ -611,7 +747,7 @@ async function handleFile(file){
 function render(){
   document.getElementById('editRowLabel').style.display='flex';
   els.toolbar.style.display='flex';
-  els.treeWrap.style.display='block';
+  els.tabBar.style.display='flex';
   els.fileMeta.innerHTML = 'archivo: <b>'+escapeHtml(state.fileName)+'</b>'
     + (state.format==='bedrock' ? '  ·  storage version: <b>'+state.bedrockVersion+'</b>' : '');
   els.formatPill.textContent = state.format==='bedrock' ? 'Bedrock Edition' : 'Java Edition';
@@ -620,6 +756,8 @@ function render(){
   els.treeWrap.innerHTML = '';
   const rootEl = buildNode(state.root, [], true);
   els.treeWrap.appendChild(rootEl);
+
+  renderActiveTab();
 }
 
 function typeBadge(type){
@@ -978,6 +1116,372 @@ function downloadBlob(blob, filename){
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  showSaveToast(filename);
+}
+
+let saveToastTimer = null;
+function showSaveToast(filename){
+  let toast = document.getElementById('saveToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'saveToast';
+    toast.className = 'save-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML =
+    '<span class="save-toast-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none">'
+    + '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>'
+    + '<path d="M7.5 12.5l3 3 6-6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '</svg></span>'
+    + '<span class="save-toast-text"><b>Guardado</b><br>'+escapeHtml(filename)+' se descargó correctamente</span>';
+
+  // reinicia la animación aunque ya estuviera visible (clic repetido en Guardar)
+  toast.classList.remove('show');
+  void toast.offsetWidth; // fuerza reflow
+  toast.classList.add('show');
+
+  clearTimeout(saveToastTimer);
+  saveToastTimer = setTimeout(()=> toast.classList.remove('show'), 3200);
+}
+
+/* ============================================================
+   VISTAS ESPECIALIZADAS: Mundo / Jugador / Inventario
+   ============================================================ */
+let currentTab = 'tree';
+
+function getEntries(x){
+  if(!x) return null;
+  if(Array.isArray(x)) return x;              // item de lista tipo compound
+  if(x.type === TAG.COMPOUND) return x.value;  // nodo compound normal
+  return null;
+}
+function findChild(x, name){
+  const entries = getEntries(x);
+  if(!entries) return null;
+  return entries.find(e=>e.name===name) || null;
+}
+function findFirst(x, names){
+  for(const n of names){ const f = findChild(x, n); if(f) return f; }
+  return null;
+}
+
+// nodo base: Data (Java) o la raíz misma (Bedrock, sin envoltorio "Data")
+function getBaseNode(){
+  return findChild(state.root, 'Data') || state.root;
+}
+function getPlayerNode(){
+  return findChild(getBaseNode(), 'Player'); // solo existe en mundos Java de un jugador
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  els.tabBar.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab===tab);
+  });
+  els.treeWrap.style.display = tab==='tree' ? 'block' : 'none';
+  els.worldView.style.display = tab==='world' ? 'block' : 'none';
+  els.playerView.style.display = tab==='player' ? 'block' : 'none';
+  els.inventoryView.style.display = tab==='inventory' ? 'block' : 'none';
+  renderActiveTab();
+}
+function renderActiveTab(){
+  if(!state.root) return;
+  if(currentTab==='world') renderWorldView();
+  else if(currentTab==='player') renderPlayerView();
+  else if(currentTab==='inventory') renderInventoryView();
+}
+
+els.tabBar.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+});
+
+/* ---------- helpers de campos ---------- */
+function fieldInput(node, opts){
+  opts = opts || {};
+  const wrap = document.createElement('div');
+  wrap.className = 'sv-field' + (node ? '' : ' missing');
+  const label = document.createElement('label');
+  label.textContent = opts.label || '';
+  wrap.appendChild(label);
+
+  if(!node){
+    const input = document.createElement('input');
+    input.disabled = true; input.value = 'no encontrado en este archivo';
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  if(opts.select){
+    const sel = document.createElement('select');
+    opts.select.forEach(([val,text])=>{
+      const o = document.createElement('option'); o.value=val; o.textContent=text;
+      if(String(node.value)===String(val)) o.selected=true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', ()=>{ applyPrimitiveEdit(node, {value:sel.value}); });
+    wrap.appendChild(sel);
+    return wrap;
+  }
+
+  const input = document.createElement('input');
+  input.className = node.type===TAG.STRING ? 'str' : 'num';
+  input.value = node.type===TAG.LONG ? node.value.toString() : node.value;
+  input.addEventListener('change', ()=> applyPrimitiveEdit(node, input));
+  wrap.appendChild(input);
+  return wrap;
+}
+function listItemField(listNode, idx, label){
+  if(!listNode || !listNode.value || !listNode.value.items || listNode.value.items.length<=idx) {
+    return fieldInput(null, {label});
+  }
+  const itemNode = { type: listNode.value.itemType, name:'', value: listNode.value.items[idx],
+                      __listParent: listNode.value, __listIndex: idx };
+  return fieldInput(itemNode, {label});
+}
+
+/* ---------- vista MUNDO ---------- */
+function renderWorldView(){
+  const base = getBaseNode();
+  const seed = findChild(base,'RandomSeed') || findChild(findChild(base,'WorldGenSettings'),'seed');
+  els.worldView.innerHTML = '';
+
+  const s1 = document.createElement('div'); s1.className='sv-section';
+  s1.innerHTML = '<div class="sv-title">Identidad del mundo</div>';
+  const g1 = document.createElement('div'); g1.className='sv-grid';
+  g1.appendChild(fieldInput(findChild(base,'LevelName'), {label:'Nombre del mundo'}));
+  g1.appendChild(fieldInput(seed, {label:'Semilla (seed)'}));
+  g1.appendChild(fieldInput(findChild(base,'Time'), {label:'Tiempo total (ticks)'}));
+  g1.appendChild(fieldInput(findChild(base,'DayTime'), {label:'Hora del día (ticks)'}));
+  s1.appendChild(g1);
+
+  const s2 = document.createElement('div'); s2.className='sv-section';
+  s2.innerHTML = '<div class="sv-title">Reglas</div>';
+  const g2 = document.createElement('div'); g2.className='sv-grid';
+  g2.appendChild(fieldInput(findChild(base,'GameType'), {label:'Modo de juego', select:[
+    ['0','Survival'],['1','Creative'],['2','Adventure'],['3','Spectator']]}));
+  g2.appendChild(fieldInput(findChild(base,'Difficulty'), {label:'Dificultad', select:[
+    ['0','Peaceful'],['1','Easy'],['2','Normal'],['3','Hard']]}));
+  s2.appendChild(g2);
+
+  const s3 = document.createElement('div'); s3.className='sv-section';
+  s3.innerHTML = '<div class="sv-title">Punto de reaparición (spawn)</div>';
+  const g3 = document.createElement('div'); g3.className='sv-grid';
+  g3.appendChild(fieldInput(findChild(base,'SpawnX'), {label:'Spawn X'}));
+  g3.appendChild(fieldInput(findChild(base,'SpawnY'), {label:'Spawn Y'}));
+  g3.appendChild(fieldInput(findChild(base,'SpawnZ'), {label:'Spawn Z'}));
+  s3.appendChild(g3);
+
+  els.worldView.appendChild(s1);
+  els.worldView.appendChild(s2);
+  els.worldView.appendChild(s3);
+}
+
+/* ---------- vista JUGADOR ---------- */
+function renderPlayerView(){
+  const player = getPlayerNode();
+  els.playerView.innerHTML = '';
+
+  if(!player){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = state.format==='bedrock'
+      ? 'En Bedrock Edition, los datos del jugador (vida, posición, inventario) no se guardan en level.dat: viven en la base de datos del mundo (carpeta "db"), fuera del alcance de este editor.'
+      : 'No se encontró un tag "Player" en este archivo. Esto es normal en mundos de servidor multijugador, donde cada jugador tiene su propio archivo dentro de la carpeta "playerdata/" en lugar de guardarse en level.dat.';
+    els.playerView.appendChild(note);
+    return;
+  }
+
+  const s1 = document.createElement('div'); s1.className='sv-section';
+  s1.innerHTML = '<div class="sv-title">Estado</div>';
+  const g1 = document.createElement('div'); g1.className='sv-grid';
+  g1.appendChild(fieldInput(findChild(player,'Health'), {label:'Salud'}));
+  g1.appendChild(fieldInput(findChild(player,'foodLevel'), {label:'Nivel de hambre'}));
+  g1.appendChild(fieldInput(findChild(player,'Air'), {label:'Aire'}));
+  g1.appendChild(fieldInput(findChild(player,'XpLevel'), {label:'Nivel de experiencia'}));
+  g1.appendChild(fieldInput(findChild(player,'XpTotal'), {label:'Experiencia total'}));
+  g1.appendChild(fieldInput(findChild(player,'playerGameType'), {label:'Modo de juego', select:[
+    ['0','Survival'],['1','Creative'],['2','Adventure'],['3','Spectator']]}));
+  s1.appendChild(g1);
+
+  const posNode = findChild(player,'Pos');
+  const rotNode = findChild(player,'Rotation');
+  const s2 = document.createElement('div'); s2.className='sv-section';
+  s2.innerHTML = '<div class="sv-title">Posición</div>';
+  const g2 = document.createElement('div'); g2.className='sv-grid';
+  g2.appendChild(listItemField(posNode, 0, 'X'));
+  g2.appendChild(listItemField(posNode, 1, 'Y'));
+  g2.appendChild(listItemField(posNode, 2, 'Z'));
+  g2.appendChild(listItemField(rotNode, 0, 'Rotación (yaw)'));
+  g2.appendChild(listItemField(rotNode, 1, 'Inclinación (pitch)'));
+  s2.appendChild(g2);
+
+  els.playerView.appendChild(s1);
+  els.playerView.appendChild(s2);
+
+  const note = document.createElement('div'); note.className='sv-note';
+  note.style.marginTop='18px';
+  note.textContent = 'Encantamientos, efectos de poción y otros datos anidados del jugador siguen disponibles en la pestaña "Árbol NBT", dentro de Data → Player.';
+  els.playerView.appendChild(note);
+}
+
+/* ---------- vista INVENTARIO ---------- */
+const SLOT_LAYOUT = {
+  armor: [[103,'Casco'],[102,'Pechera'],[101,'Pantalones'],[100,'Botas']],
+  offhand: [[-106,'Mano sec.']],
+  main: Array.from({length:27}, (_,i)=>[9+i,'']),
+  hotbar: Array.from({length:9}, (_,i)=>[i,''])
+};
+
+function renderInventoryView(){
+  const player = getPlayerNode();
+  els.inventoryView.innerHTML = '';
+
+  if(!player){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = state.format==='bedrock'
+      ? 'En Bedrock Edition el inventario del jugador no se guarda en level.dat: vive en la base de datos del mundo (carpeta "db"), fuera del alcance de este editor.'
+      : 'No se encontró un jugador embebido en este archivo (típico de mundos de servidor, donde el inventario está en "playerdata/" por jugador).';
+    els.inventoryView.appendChild(note);
+    return;
+  }
+
+  const invNode = findChild(player, 'Inventory'); // TAG_LIST de compounds
+  if(!invNode || invNode.type !== TAG.LIST){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = 'No se encontró el tag "Inventory" dentro de Player en este archivo.';
+    els.inventoryView.appendChild(note);
+    return;
+  }
+  if(invNode.value.items.length>0 && invNode.value.itemType !== TAG.COMPOUND){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = 'El tag "Inventory" no tiene el formato esperado (lista de compounds).';
+    els.inventoryView.appendChild(note);
+    return;
+  }
+
+  const slotMap = {};
+  invNode.value.items.forEach((item, idx)=>{
+    const se = findChild(item, 'Slot');
+    if(se) slotMap[se.value] = idx;
+  });
+
+  function makeSlot(slotNum, label){
+    const cell = document.createElement('div');
+    const holder = document.createElement('div'); holder.className='slot-wrap';
+    const idx = slotMap[slotNum];
+    if(idx !== undefined){
+      const item = invNode.value.items[idx];
+      const idEntry = findChild(item,'id');
+      const countEntry = findChild(item,'Count');
+      cell.className = 'slot filled';
+      const idText = document.createElement('div'); idText.className='slot-id';
+      idText.textContent = (idEntry ? idEntry.value : '?').replace('minecraft:','');
+      cell.appendChild(idText);
+      if(countEntry){
+        const cnt = document.createElement('div'); cnt.className='slot-count';
+        cnt.textContent = 'x'+countEntry.value;
+        cell.appendChild(cnt);
+      }
+      cell.addEventListener('click', ()=> openSlotEditor(slotNum, idx, invNode));
+    } else {
+      cell.className = 'slot';
+      const plus = document.createElement('div'); plus.className='slot-plus'; plus.textContent='+';
+      cell.appendChild(plus);
+      cell.addEventListener('click', ()=> openSlotEditor(slotNum, null, invNode));
+    }
+    holder.appendChild(cell);
+    if(label){ const lb=document.createElement('div'); lb.className='slot-label'; lb.textContent=label; holder.appendChild(lb); }
+    return holder;
+  }
+
+  function buildRow(pairs, grid9){
+    const row = document.createElement('div');
+    row.className = 'inv-row' + (grid9 ? ' grid9' : '');
+    pairs.forEach(([num,label])=> row.appendChild(makeSlot(num,label)));
+    return row;
+  }
+
+  const top = document.createElement('div'); top.className='inv-block';
+  top.innerHTML = '<div class="sv-title">Armadura y mano secundaria</div>';
+  top.appendChild(buildRow(SLOT_LAYOUT.armor.concat(SLOT_LAYOUT.offhand), false));
+  els.inventoryView.appendChild(top);
+
+  const main = document.createElement('div'); main.className='inv-block';
+  main.innerHTML = '<div class="sv-title">Inventario principal</div>';
+  main.appendChild(buildRow(SLOT_LAYOUT.main, true));
+  els.inventoryView.appendChild(main);
+
+  const hot = document.createElement('div'); hot.className='inv-block';
+  hot.innerHTML = '<div class="sv-title">Barra rápida (hotbar)</div>';
+  hot.appendChild(buildRow(SLOT_LAYOUT.hotbar, true));
+  els.inventoryView.appendChild(hot);
+
+  const note = document.createElement('div'); note.className='sv-note';
+  note.style.marginTop='16px';
+  note.textContent = 'Toca un espacio vacío para añadir un ítem, o uno ocupado para editarlo o quitarlo. Encantamientos y otros datos extra de un ítem se editan desde la pestaña "Árbol NBT".';
+  els.inventoryView.appendChild(note);
+}
+
+function openSlotEditor(slotNum, idx, invNode){
+  const existing = idx!==null ? invNode.value.items[idx] : null;
+  const idEntry = existing ? findChild(existing,'id') : null;
+  const countEntry = existing ? findChild(existing,'Count') : null;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'slot-editor';
+  const box = document.createElement('div');
+  box.className = 'slot-editor-box';
+  box.innerHTML = '<h4>Espacio #'+slotNum+'</h4>';
+
+  const idField = document.createElement('div'); idField.className='sv-field';
+  idField.innerHTML = '<label>ID del ítem (ej. minecraft:diamond)</label>';
+  const idInput = document.createElement('input'); idInput.value = idEntry ? idEntry.value : 'minecraft:stone';
+  idField.appendChild(idInput);
+
+  const countField = document.createElement('div'); countField.className='sv-field';
+  countField.innerHTML = '<label>Cantidad</label>';
+  const countInput = document.createElement('input'); countInput.type='number'; countInput.min='1'; countInput.max='64';
+  countInput.value = countEntry ? countEntry.value : 1;
+  countField.appendChild(countInput);
+
+  box.appendChild(idField);
+  box.appendChild(countField);
+
+  const actions = document.createElement('div'); actions.className='slot-editor-actions';
+  const saveBtn = document.createElement('button'); saveBtn.className='primary'; saveBtn.textContent='Guardar';
+  const cancelBtn = document.createElement('button'); cancelBtn.textContent='Cancelar';
+  actions.appendChild(saveBtn); actions.appendChild(cancelBtn);
+  if(existing){
+    const delBtn = document.createElement('button'); delBtn.className='danger'; delBtn.textContent='Quitar';
+    delBtn.addEventListener('click', ()=>{
+      invNode.value.items.splice(idx,1);
+      document.body.removeChild(overlay);
+      renderInventoryView();
+    });
+    actions.appendChild(delBtn);
+  }
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) document.body.removeChild(overlay); });
+  cancelBtn.addEventListener('click', ()=> document.body.removeChild(overlay));
+  saveBtn.addEventListener('click', ()=>{
+    const idVal = idInput.value.trim() || 'minecraft:stone';
+    const countVal = Math.max(1, Math.min(64, parseInt(countInput.value,10)||1));
+    if(existing){
+      if(idEntry) idEntry.value = idVal; else existing.push({type:TAG.STRING,name:'id',value:idVal});
+      if(countEntry) countEntry.value = countVal; else existing.push({type:TAG.BYTE,name:'Count',value:countVal});
+    } else {
+      const newItem = [
+        {type:TAG.STRING, name:'id', value:idVal},
+        {type:TAG.BYTE, name:'Slot', value:slotNum},
+        {type:TAG.BYTE, name:'Count', value:countVal}
+      ];
+      invNode.value.items.push(newItem);
+    }
+    document.body.removeChild(overlay);
+    renderInventoryView();
+  });
 }
 
 /* ============================================================
@@ -1001,10 +1505,15 @@ els.dropZone.addEventListener('drop', e=>{
 els.btnSave.addEventListener('click', saveFile);
 els.btnReload.addEventListener('click', ()=>{
   state = {format:null, root:null, fileName:'level.dat'};
+  currentTab = 'tree';
   document.getElementById('editRowLabel').style.display='none';
   els.toolbar.style.display='none';
+  els.tabBar.style.display='none';
   els.treeWrap.style.display='none';
   els.treeWrap.innerHTML='';
+  els.worldView.style.display='none';
+  els.playerView.style.display='none';
+  els.inventoryView.style.display='none';
   els.fileInput.value='';
   clearError(); clearWarn();
 });
@@ -1017,3 +1526,4 @@ if(typeof CompressionStream === 'undefined' || typeof DecompressionStream === 'u
 </script>
 </body>
 </html>
+
