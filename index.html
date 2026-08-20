@@ -314,6 +314,43 @@
   .sv-field.missing input, .sv-field.missing select{color:var(--ink-faint); font-style:italic;}
   .sv-missing-tag{font-size:10px; color:var(--ink-faint); font-family:var(--mono);}
 
+  /* inventario: cuadrícula tipo Minecraft */
+  .inv-block{margin-bottom:20px;}
+  .inv-block:last-child{margin-bottom:0;}
+  .inv-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .inv-row.grid9{display:grid; grid-template-columns:repeat(9, 1fr); gap:6px; max-width:520px;}
+  .slot{
+    position:relative; aspect-ratio:1; min-width:44px; border-radius:4px;
+    border:1px solid var(--line); background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:border-color .1s, background .1s;
+  }
+  .slot:hover{border-color:var(--diamond-dim); background:#1d2528;}
+  .slot.filled{border-color:var(--line-bright); background:linear-gradient(160deg, rgba(226,177,60,.06), var(--panel-2));}
+  .slot .slot-id{
+    font-family:var(--mono); font-size:8.5px; color:var(--ink); text-align:center; line-height:1.2;
+    padding:2px; word-break:break-word; max-width:100%;
+  }
+  .slot .slot-count{
+    position:absolute; bottom:2px; right:4px; font-family:var(--mono); font-size:10px; font-weight:600; color:var(--gold);
+  }
+  .slot .slot-plus{color:var(--ink-faint); font-size:18px;}
+  .slot-label{font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); text-align:center; margin-top:3px;}
+  .slot-wrap{display:flex; flex-direction:column; align-items:center;}
+
+  .slot-editor{
+    position:fixed; inset:0; background:rgba(6,8,9,.72); display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .slot-editor-box{
+    background:var(--panel); border:1px solid var(--line-bright); border-radius:6px; padding:20px;
+    width:100%; max-width:340px; border-top:2px solid var(--diamond);
+  }
+  .slot-editor-box h4{margin:0 0 14px; font-family:var(--display); font-size:14px; color:var(--ink);}
+  .slot-editor-box .sv-field{margin-bottom:12px;}
+  .slot-editor-actions{display:flex; gap:8px; margin-top:16px;}
+  .slot-editor-actions button{flex:1;}
+
   /* ---------- toast de guardado ---------- */
   .save-toast{
     position:fixed; left:50%; bottom:26px; z-index:80;
@@ -375,6 +412,9 @@
     .tab-btn{flex:1 1 auto; text-align:center; padding:9px 8px; font-size:11.5px;}
     .special-view{padding:12px;}
     .sv-grid{grid-template-columns:repeat(auto-fill, minmax(140px,1fr));}
+    .inv-row.grid9{grid-template-columns:repeat(9, 1fr); gap:4px; max-width:100%;}
+    .slot{min-width:0;}
+    .slot .slot-id{font-size:7px;}
   }
 </style>
 </head>
@@ -429,10 +469,14 @@
   <div id="tabBar" class="tabbar" style="display:none;">
     <button class="tab-btn active" data-tab="tree" type="button">🌳 Árbol NBT</button>
     <button class="tab-btn" data-tab="world" type="button">🌍 Mundo</button>
+    <button class="tab-btn" data-tab="player" id="tabPlayer" type="button" style="display:none;">🧍 Jugador</button>
+    <button class="tab-btn" data-tab="inventory" id="tabInventory" type="button" style="display:none;">🎒 Inventario</button>
   </div>
 
   <div id="treeWrap" class="tree-wrap" style="display:none;"></div>
   <div id="worldView" class="special-view" style="display:none;"></div>
+  <div id="playerView" class="special-view" style="display:none;"></div>
+  <div id="inventoryView" class="special-view" style="display:none;"></div>
 
 </main>
 
@@ -632,6 +676,10 @@ const els = {
   btnCollapseAll: document.getElementById('btnCollapseAll'),
   tabBar: document.getElementById('tabBar'),
   worldView: document.getElementById('worldView'),
+  playerView: document.getElementById('playerView'),
+  inventoryView: document.getElementById('inventoryView'),
+  tabPlayer: document.getElementById('tabPlayer'),
+  tabInventory: document.getElementById('tabInventory'),
 };
 
 function showError(msg){
@@ -706,6 +754,7 @@ function render(){
     + (state.format==='bedrock' ? '  ·  storage version: <b>'+state.bedrockVersion+'</b>' : '');
   els.formatPill.textContent = state.format==='bedrock' ? 'Bedrock Edition' : 'Java Edition';
   els.formatPill.className = 'pill ' + (state.format==='bedrock' ? 'bedrock' : 'java');
+  updatePlayerTabsVisibility();
 
   els.treeWrap.innerHTML = '';
   const rootEl = buildNode(state.root, [], true);
@@ -1123,6 +1172,19 @@ function findFirst(x, names){
 function getBaseNode(){
   return findChild(state.root, 'Data') || state.root;
 }
+function getPlayerNode(){
+  // solo tiene sentido buscarlo en Java: en Bedrock el jugador no vive en level.dat
+  if(state.format === 'bedrock') return null;
+  return findChild(getBaseNode(), 'Player');
+}
+
+// las pestañas Jugador/Inventario solo existen en mundos Java de un jugador;
+// en Bedrock ese dato ni siquiera está en level.dat, así que ocultamos las pestañas por completo
+function updatePlayerTabsVisibility(){
+  const isJava = state.format !== 'bedrock';
+  els.tabPlayer.style.display = isJava ? '' : 'none';
+  els.tabInventory.style.display = isJava ? '' : 'none';
+}
 
 function switchTab(tab){
   currentTab = tab;
@@ -1131,11 +1193,15 @@ function switchTab(tab){
   });
   els.treeWrap.style.display = tab==='tree' ? 'block' : 'none';
   els.worldView.style.display = tab==='world' ? 'block' : 'none';
+  els.playerView.style.display = tab==='player' ? 'block' : 'none';
+  els.inventoryView.style.display = tab==='inventory' ? 'block' : 'none';
   renderActiveTab();
 }
 function renderActiveTab(){
   if(!state.root) return;
   if(currentTab==='world') renderWorldView();
+  else if(currentTab==='player') renderPlayerView();
+  else if(currentTab==='inventory') renderInventoryView();
 }
 
 els.tabBar.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -1214,6 +1280,223 @@ function renderWorldView(){
   els.worldView.appendChild(s3);
 }
 
+function listItemField(listNode, idx, label){
+  if(!listNode || !listNode.value || !listNode.value.items || listNode.value.items.length<=idx) {
+    return fieldInput(null, {label});
+  }
+  const itemNode = { type: listNode.value.itemType, name:'', value: listNode.value.items[idx],
+                      __listParent: listNode.value, __listIndex: idx };
+  return fieldInput(itemNode, {label});
+}
+
+/* ---------- vista JUGADOR (solo Java) ---------- */
+function renderPlayerView(){
+  const player = getPlayerNode();
+  els.playerView.innerHTML = '';
+
+  if(!player){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = state.format==='bedrock'
+      ? 'En Bedrock Edition, los datos del jugador (vida, posición, inventario) no se guardan en level.dat: viven en la base de datos del mundo (carpeta "db"), fuera del alcance de este editor.'
+      : 'No se encontró un tag "Player" en este archivo. Esto es normal en mundos de servidor multijugador, donde cada jugador tiene su propio archivo dentro de la carpeta "playerdata/" en lugar de guardarse en level.dat.';
+    els.playerView.appendChild(note);
+    return;
+  }
+
+  const s1 = document.createElement('div'); s1.className='sv-section';
+  s1.innerHTML = '<div class="sv-title">Estado</div>';
+  const g1 = document.createElement('div'); g1.className='sv-grid';
+  g1.appendChild(fieldInput(findChild(player,'Health'), {label:'Salud'}));
+  g1.appendChild(fieldInput(findChild(player,'foodLevel'), {label:'Nivel de hambre'}));
+  g1.appendChild(fieldInput(findChild(player,'Air'), {label:'Aire'}));
+  g1.appendChild(fieldInput(findChild(player,'XpLevel'), {label:'Nivel de experiencia'}));
+  g1.appendChild(fieldInput(findChild(player,'XpTotal'), {label:'Experiencia total'}));
+  g1.appendChild(fieldInput(findChild(player,'playerGameType'), {label:'Modo de juego', select:[
+    ['0','Survival'],['1','Creative'],['2','Adventure'],['3','Spectator']]}));
+  s1.appendChild(g1);
+
+  const posNode = findChild(player,'Pos');
+  const rotNode = findChild(player,'Rotation');
+  const s2 = document.createElement('div'); s2.className='sv-section';
+  s2.innerHTML = '<div class="sv-title">Posición</div>';
+  const g2 = document.createElement('div'); g2.className='sv-grid';
+  g2.appendChild(listItemField(posNode, 0, 'X'));
+  g2.appendChild(listItemField(posNode, 1, 'Y'));
+  g2.appendChild(listItemField(posNode, 2, 'Z'));
+  g2.appendChild(listItemField(rotNode, 0, 'Rotación (yaw)'));
+  g2.appendChild(listItemField(rotNode, 1, 'Inclinación (pitch)'));
+  s2.appendChild(g2);
+
+  els.playerView.appendChild(s1);
+  els.playerView.appendChild(s2);
+
+  const note = document.createElement('div'); note.className='sv-note';
+  note.style.marginTop='18px';
+  note.textContent = 'Encantamientos, efectos de poción y otros datos anidados del jugador siguen disponibles en la pestaña "Árbol NBT", dentro de Data → Player.';
+  els.playerView.appendChild(note);
+}
+
+/* ---------- vista INVENTARIO (solo Java) ---------- */
+const SLOT_LAYOUT = {
+  armor: [[103,'Casco'],[102,'Pechera'],[101,'Pantalones'],[100,'Botas']],
+  offhand: [[-106,'Mano sec.']],
+  main: Array.from({length:27}, (_,i)=>[9+i,'']),
+  hotbar: Array.from({length:9}, (_,i)=>[i,''])
+};
+
+function renderInventoryView(){
+  const player = getPlayerNode();
+  els.inventoryView.innerHTML = '';
+
+  if(!player){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = state.format==='bedrock'
+      ? 'En Bedrock Edition el inventario del jugador no se guarda en level.dat: vive en la base de datos del mundo (carpeta "db"), fuera del alcance de este editor.'
+      : 'No se encontró un jugador embebido en este archivo (típico de mundos de servidor, donde el inventario está en "playerdata/" por jugador).';
+    els.inventoryView.appendChild(note);
+    return;
+  }
+
+  const invNode = findChild(player, 'Inventory'); // TAG_LIST de compounds
+  if(!invNode || invNode.type !== TAG.LIST){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = 'No se encontró el tag "Inventory" dentro de Player en este archivo.';
+    els.inventoryView.appendChild(note);
+    return;
+  }
+  if(invNode.value.items.length>0 && invNode.value.itemType !== TAG.COMPOUND){
+    const note = document.createElement('div'); note.className='sv-note';
+    note.textContent = 'El tag "Inventory" no tiene el formato esperado (lista de compounds).';
+    els.inventoryView.appendChild(note);
+    return;
+  }
+
+  const slotMap = {};
+  invNode.value.items.forEach((item, idx)=>{
+    const se = findChild(item, 'Slot');
+    if(se) slotMap[se.value] = idx;
+  });
+
+  function makeSlot(slotNum, label){
+    const cell = document.createElement('div');
+    const holder = document.createElement('div'); holder.className='slot-wrap';
+    const idx = slotMap[slotNum];
+    if(idx !== undefined){
+      const item = invNode.value.items[idx];
+      const idEntry = findChild(item,'id');
+      const countEntry = findChild(item,'Count');
+      cell.className = 'slot filled';
+      const idText = document.createElement('div'); idText.className='slot-id';
+      idText.textContent = (idEntry ? idEntry.value : '?').replace('minecraft:','');
+      cell.appendChild(idText);
+      if(countEntry){
+        const cnt = document.createElement('div'); cnt.className='slot-count';
+        cnt.textContent = 'x'+countEntry.value;
+        cell.appendChild(cnt);
+      }
+      cell.addEventListener('click', ()=> openSlotEditor(slotNum, idx, invNode));
+    } else {
+      cell.className = 'slot';
+      const plus = document.createElement('div'); plus.className='slot-plus'; plus.textContent='+';
+      cell.appendChild(plus);
+      cell.addEventListener('click', ()=> openSlotEditor(slotNum, null, invNode));
+    }
+    holder.appendChild(cell);
+    if(label){ const lb=document.createElement('div'); lb.className='slot-label'; lb.textContent=label; holder.appendChild(lb); }
+    return holder;
+  }
+
+  function buildRow(pairs, grid9){
+    const row = document.createElement('div');
+    row.className = 'inv-row' + (grid9 ? ' grid9' : '');
+    pairs.forEach(([num,label])=> row.appendChild(makeSlot(num,label)));
+    return row;
+  }
+
+  const top = document.createElement('div'); top.className='inv-block';
+  top.innerHTML = '<div class="sv-title">Armadura y mano secundaria</div>';
+  top.appendChild(buildRow(SLOT_LAYOUT.armor.concat(SLOT_LAYOUT.offhand), false));
+  els.inventoryView.appendChild(top);
+
+  const main = document.createElement('div'); main.className='inv-block';
+  main.innerHTML = '<div class="sv-title">Inventario principal</div>';
+  main.appendChild(buildRow(SLOT_LAYOUT.main, true));
+  els.inventoryView.appendChild(main);
+
+  const hot = document.createElement('div'); hot.className='inv-block';
+  hot.innerHTML = '<div class="sv-title">Barra rápida (hotbar)</div>';
+  hot.appendChild(buildRow(SLOT_LAYOUT.hotbar, true));
+  els.inventoryView.appendChild(hot);
+
+  const note = document.createElement('div'); note.className='sv-note';
+  note.style.marginTop='16px';
+  note.textContent = 'Toca un espacio vacío para añadir un ítem, o uno ocupado para editarlo o quitarlo. Encantamientos y otros datos extra de un ítem se editan desde la pestaña "Árbol NBT".';
+  els.inventoryView.appendChild(note);
+}
+
+function openSlotEditor(slotNum, idx, invNode){
+  const existing = idx!==null ? invNode.value.items[idx] : null;
+  const idEntry = existing ? findChild(existing,'id') : null;
+  const countEntry = existing ? findChild(existing,'Count') : null;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'slot-editor';
+  const box = document.createElement('div');
+  box.className = 'slot-editor-box';
+  box.innerHTML = '<h4>Espacio #'+slotNum+'</h4>';
+
+  const idField = document.createElement('div'); idField.className='sv-field';
+  idField.innerHTML = '<label>ID del ítem (ej. minecraft:diamond)</label>';
+  const idInput = document.createElement('input'); idInput.value = idEntry ? idEntry.value : 'minecraft:stone';
+  idField.appendChild(idInput);
+
+  const countField = document.createElement('div'); countField.className='sv-field';
+  countField.innerHTML = '<label>Cantidad</label>';
+  const countInput = document.createElement('input'); countInput.type='number'; countInput.min='1'; countInput.max='64';
+  countInput.value = countEntry ? countEntry.value : 1;
+  countField.appendChild(countInput);
+
+  box.appendChild(idField);
+  box.appendChild(countField);
+
+  const actions = document.createElement('div'); actions.className='slot-editor-actions';
+  const saveBtn = document.createElement('button'); saveBtn.className='primary'; saveBtn.textContent='Guardar';
+  const cancelBtn = document.createElement('button'); cancelBtn.textContent='Cancelar';
+  actions.appendChild(saveBtn); actions.appendChild(cancelBtn);
+  if(existing){
+    const delBtn = document.createElement('button'); delBtn.className='danger'; delBtn.textContent='Quitar';
+    delBtn.addEventListener('click', ()=>{
+      invNode.value.items.splice(idx,1);
+      document.body.removeChild(overlay);
+      renderInventoryView();
+    });
+    actions.appendChild(delBtn);
+  }
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) document.body.removeChild(overlay); });
+  cancelBtn.addEventListener('click', ()=> document.body.removeChild(overlay));
+  saveBtn.addEventListener('click', ()=>{
+    const idVal = idInput.value.trim() || 'minecraft:stone';
+    const countVal = Math.max(1, Math.min(64, parseInt(countInput.value,10)||1));
+    if(existing){
+      if(idEntry) idEntry.value = idVal; else existing.push({type:TAG.STRING,name:'id',value:idVal});
+      if(countEntry) countEntry.value = countVal; else existing.push({type:TAG.BYTE,name:'Count',value:countVal});
+    } else {
+      const newItem = [
+        {type:TAG.STRING, name:'id', value:idVal},
+        {type:TAG.BYTE, name:'Slot', value:slotNum},
+        {type:TAG.BYTE, name:'Count', value:countVal}
+      ];
+      invNode.value.items.push(newItem);
+    }
+    document.body.removeChild(overlay);
+    renderInventoryView();
+  });
+}
+
 
 /* ============================================================
    EVENTOS DE CARGA DE ARCHIVO
@@ -1243,6 +1526,10 @@ els.btnReload.addEventListener('click', ()=>{
   els.treeWrap.style.display='none';
   els.treeWrap.innerHTML='';
   els.worldView.style.display='none';
+  els.playerView.style.display='none';
+  els.inventoryView.style.display='none';
+  els.tabPlayer.style.display='none';
+  els.tabInventory.style.display='none';
   els.fileInput.value='';
   clearError(); clearWarn();
 });
