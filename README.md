@@ -3,8 +3,6 @@
 Editor web de `level.dat` para **Minecraft Java Edition** y **Bedrock Edition**.
 Lee, muestra en árbol y permite editar el NBT binario directamente en el navegador — sin subir el archivo a ningún servidor.
 
-**Demo en vivo:** `https://TU-USUARIO.github.io/NOMBRE-DEL-REPO/`
-(reemplaza con tu usuario y el nombre real del repo una vez publicado)
 
 ## Qué hace
 
