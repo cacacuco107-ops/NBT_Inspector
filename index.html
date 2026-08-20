@@ -1103,18 +1103,18 @@ async function saveFile(){
       const full = new Uint8Array(8 + body.byteLength);
       full.set(new Uint8Array(header), 0);
       full.set(new Uint8Array(body), 8);
-      downloadBlob(new Blob([full], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
+      await downloadBlob(new Blob([full], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
     } else {
       const writer = new NBTWriter(false);
       writer.writeNamedRoot(state.root);
       const raw = writer.toArrayBuffer();
       if(state.format === 'java-raw'){
-        downloadBlob(new Blob([raw], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
+        await downloadBlob(new Blob([raw], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
       } else {
         const cs = new CompressionStream('gzip');
         const stream = new Blob([raw]).stream().pipeThrough(cs);
         const compressed = await new Response(stream).arrayBuffer();
-        downloadBlob(new Blob([compressed], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
+        await downloadBlob(new Blob([compressed], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
       }
     }
   }catch(err){
@@ -1128,7 +1128,28 @@ function ensureDatExtension(name){
   return /\.dat$/i.test(base) ? base : base.replace(/\.[^./\\]+$/, '') + '.dat';
 }
 
-function downloadBlob(blob, filename){
+async function downloadBlob(blob, filename){
+  // en Android, Chrome a veces le pega ".txt" al nombre cuando descarga una
+  // extensión que no reconoce (como .dat). Compartir el archivo directamente
+  // (en vez de forzar una descarga) evita ese problema porque respeta el
+  // nombre exacto. Si el navegador no soporta compartir archivos, caemos
+  // de vuelta a la descarga normal de toda la vida.
+  try{
+    const file = new File([blob], filename, {type: blob.type || 'application/octet-stream'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file], title: filename});
+        showSaveToast(filename);
+        return;
+      }catch(shareErr){
+        if(shareErr && shareErr.name === 'AbortError'){
+          return; // el usuario cerró el cuadro de compartir sin elegir nada
+        }
+        // cualquier otro error: seguimos abajo con la descarga normal como respaldo
+      }
+    }
+  }catch(e){ /* si algo falla armando el File, seguimos con la descarga normal */ }
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
