@@ -856,8 +856,12 @@ function buildNode(node, path, isRoot){
     } else {
       input.value = node.value;
     }
-    input.addEventListener('change', ()=>{
+    input.addEventListener('input', ()=>{
       applyPrimitiveEdit(node, input);
+    });
+    input.addEventListener('blur', ()=>{
+      // al salir del campo, redibuja el valor ya normalizado (recortado a rango, etc.)
+      input.value = node.type===TAG.LONG ? node.value.toString() : node.value;
     });
     row.appendChild(input);
   }
@@ -920,7 +924,13 @@ function applyPrimitiveEdit(node, input){
       case TAG.BYTE: node.value = clampInt(parseInt(raw,10)||0, -128, 127); break;
       case TAG.SHORT: node.value = clampInt(parseInt(raw,10)||0, -32768, 32767); break;
       case TAG.INT: node.value = clampInt(parseInt(raw,10)||0, -2147483648, 2147483647); break;
-      case TAG.LONG: node.value = BigInt(raw.trim()===''?'0':raw.trim()); break;
+      case TAG.LONG: {
+        const t = raw.trim();
+        if(t===''){ node.value = 0n; }
+        else if(/^-?\d+$/.test(t)){ node.value = BigInt(t); }
+        // si va a medio escribir (ej. solo "-"), no tocamos el valor todavía; se valida al terminar
+        break;
+      }
       case TAG.FLOAT: node.value = parseFloat(raw)||0; break;
       case TAG.DOUBLE: node.value = parseFloat(raw)||0; break;
       case TAG.STRING: node.value = raw; break;
@@ -1239,7 +1249,10 @@ function fieldInput(node, opts){
   const input = document.createElement('input');
   input.className = node.type===TAG.STRING ? 'str' : 'num';
   input.value = node.type===TAG.LONG ? node.value.toString() : node.value;
-  input.addEventListener('change', ()=> applyPrimitiveEdit(node, input));
+  input.addEventListener('input', ()=> applyPrimitiveEdit(node, input));
+  input.addEventListener('blur', ()=>{
+    input.value = node.type===TAG.LONG ? node.value.toString() : node.value;
+  });
   wrap.appendChild(input);
   return wrap;
 }
