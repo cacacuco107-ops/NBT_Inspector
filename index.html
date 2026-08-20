@@ -1103,24 +1103,29 @@ async function saveFile(){
       const full = new Uint8Array(8 + body.byteLength);
       full.set(new Uint8Array(header), 0);
       full.set(new Uint8Array(body), 8);
-      downloadBlob(new Blob([full]), state.fileName || 'level.dat');
+      downloadBlob(new Blob([full], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
     } else {
       const writer = new NBTWriter(false);
       writer.writeNamedRoot(state.root);
       const raw = writer.toArrayBuffer();
       if(state.format === 'java-raw'){
-        downloadBlob(new Blob([raw]), state.fileName || 'level.dat');
+        downloadBlob(new Blob([raw], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
       } else {
         const cs = new CompressionStream('gzip');
         const stream = new Blob([raw]).stream().pipeThrough(cs);
         const compressed = await new Response(stream).arrayBuffer();
-        downloadBlob(new Blob([compressed]), state.fileName || 'level.dat');
+        downloadBlob(new Blob([compressed], {type:'application/octet-stream'}), ensureDatExtension(state.fileName));
       }
     }
   }catch(err){
     console.error(err);
     showError('No se pudo generar el archivo:\n'+err.message);
   }
+}
+
+function ensureDatExtension(name){
+  const base = (name || 'level.dat').trim() || 'level.dat';
+  return /\.dat$/i.test(base) ? base : base.replace(/\.[^./\\]+$/, '') + '.dat';
 }
 
 function downloadBlob(blob, filename){
