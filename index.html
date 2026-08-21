@@ -760,7 +760,7 @@ function render(){
   const rootEl = buildNode(state.root, [], true);
   els.treeWrap.appendChild(rootEl);
 
-  renderActiveTab();
+  switchTab(currentTab);
 }
 
 function typeBadge(type){
